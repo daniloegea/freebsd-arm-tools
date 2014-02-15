@@ -12,6 +12,7 @@ GPU_MEM_SIZE=128			# MB
 SVN_CHECKOUT='NO'
 SVN_UPDATE='NO'
 BUILD='YES'
+JOBS=1
 BUILDKERNEL='YES'
 BUILDWORLD='YES'
 NOTIFY='NO'
@@ -36,6 +37,7 @@ usage() {
 		-b No build, just create image from previously-built source
 		-g GPU Mem Size in MB, must be 32,64,128 (?)
 		-h This help
+		-j Number of jobs (default 1)
 		-k Kernel configuration file (default RPI-B)
 		-K Do not build the kernel, use previously-built
 		-m Email address to notify
@@ -65,6 +67,9 @@ while getopts ":bg:hk:Km:pqr:s:uv:w:W" opt; do
 		h)
 			usage
 			exit
+			;;
+		j)
+			JOBS=$OPTARG
 			;;
 		k)
 			KERNCONF=$OPTARG
@@ -253,6 +258,7 @@ if [ $PREFLIGHT ]; then
 	echo "              NOTIFY: $NOTIFY"
 	echo "     SOURCE CHECKOUT: $SVN_CHECKOUT"
 	echo "       SOURCE UPDATE: $SVN_UPDATE"
+	echo "               JOBS: $JOBS"
 	echo "               BUILD: $BUILD"
 	echo "        BUILD KERNEL: $BUILDKERNEL"
 	echo "         BUILD WORLD: $BUILDWORLD"
@@ -329,18 +335,18 @@ fi
 if [ $BUILD == 'YES' ]; then
 	
 	if [ $BUILDKERNEL == 'YES' ]; then
-		make -C $SRCROOT kernel-toolchain
+		make -j $JOBS -C $SRCROOT kernel-toolchain
 		if [ ! $NOTIFY == 'NO' ]; then
 			echo `date "+%F %r"` | mail -s "${IMG_NAME}: Kernel ToolChain Build Complete" $NOTIFY
 		fi
-		make -C $SRCROOT KERNCONF=$KERNCONF WITH_FDT=yes buildkernel
+		make -j $JOBS -C $SRCROOT KERNCONF=$KERNCONF WITH_FDT=yes buildkernel
 		if [ ! $NOTIFY == 'NO' ]; then
 			echo `date "+%F %r"` | mail -s "${IMG_NAME}: Kernel Build Complete" $NOTIFY
 		fi
 	fi	
 	
 	if [ $BUILDWORLD == 'YES' ]; then
-		make -C $SRCROOT $ENABLE_MALLOC_PRODUCTION buildworld
+		make -j $JOBS -C $SRCROOT $ENABLE_MALLOC_PRODUCTION buildworld
 		if [ ! $NOTIFY == 'NO' ]; then
 			echo `date "+%F %r"` | mail -s "${IMG_NAME}: World Build Complete" $NOTIFY
 		fi
@@ -350,7 +356,7 @@ if [ $BUILD == 'YES' ]; then
 	
 	eval $buildenv make -C $SRCROOT/sys/boot clean
 	eval $buildenv make -C $SRCROOT/sys/boot obj
-	eval $buildenv make -C $SRCROOT/sys/boot UBLDR_LOADADDR=0x2000000 all
+	eval $buildenv make -j $JOBS -C $SRCROOT/sys/boot UBLDR_LOADADDR=0x2000000 all
 
 fi
 
