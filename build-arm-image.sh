@@ -18,8 +18,8 @@ BUILDWORLD='YES'
 NOTIFY='NO'
 WITHPORTS='NO'
 KERNCONF='RPI-B'
-SOURCEDIR=/src/FreeBSD/stable/10
-SVNBRANCH='svn://svn.freebsd.org/base/stable/10/'
+SOURCEDIR='/home/barba/Sources/freebsd-head/'
+SVNBRANCH='svn://svn.freebsd.org/base/head'
 UBOOT=http://people.freebsd.org/~gonzo/arm/rpi/freebsd-uboot-20130201.tar.gz
 HOSTNAME=raspberry-pi
 UFS_JOURNAL_SIZE=32		# MB
@@ -56,7 +56,7 @@ usage() {
 #
 # Options
 #
-while getopts ":bg:hk:Km:pqr:s:uv:w:W" opt; do
+while getopts ":bg:hk:j:Km:pqr:s:uv:w:W" opt; do
 	case $opt in
 		b)
 			BUILD='NO'
@@ -134,7 +134,7 @@ export GPU_MEM=$GPU_MEM_SIZE
 export PI_USER=pi
 export PI_USER_PASSWORD=raspberry
 export MNTDIR=/mnt/rpi
-export MAKEOBJDIRPREFIX=/src/FreeBSD/obj
+export MAKEOBJDIRPREFIX=/tmp/arm
 export IMG=$MAKEOBJDIRPREFIX/$IMG_TMP_NAME
 export TARGET_ARCH=armv6
 export KERNCONF=${KERNCONF}
@@ -258,7 +258,7 @@ if [ $PREFLIGHT ]; then
 	echo "              NOTIFY: $NOTIFY"
 	echo "     SOURCE CHECKOUT: $SVN_CHECKOUT"
 	echo "       SOURCE UPDATE: $SVN_UPDATE"
-	echo "               JOBS: $JOBS"
+	echo "                JOBS: $JOBS"
 	echo "               BUILD: $BUILD"
 	echo "        BUILD KERNEL: $BUILDKERNEL"
 	echo "         BUILD WORLD: $BUILDWORLD"
